@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
   double ax, ay, az;
   double *gas, *liquid, *loss_rate;       // 1D array for each particle's component that will evaporate
   double *old_x, *old_y, *old_z, *old_mass;            // save previous values whilst doing global updates
-  double totalMass, localMass, systemEnergy;  // for stats
+  double totalMass, systemEnergy;  // for stats
     
   MPI_Init(NULL, NULL);
 
@@ -128,16 +128,12 @@ int main(int argc, char* argv[]) {
       old_mass[i] = old_mass_buffer[i];
     }
 
-    double temp_d, temp_z;
+    // printf("\n Print the combined x\n");
+    // for (i=0; i<num; i++) {
+    //   printf("mass=%lf ", old_mass[i]);
+    // }
 
-    double temp_vx[partitionSizePerProcess];
-    double temp_vy[partitionSizePerProcess];
-    double temp_vz[partitionSizePerProcess];
-    double x_copy[partitionSizePerProcess];
-    double y_copy[partitionSizePerProcess];
-    double z_copy[partitionSizePerProcess];
-    double temp_mass[partitionSizePerProcess];
-    temp_index = 0;
+    double temp_d, temp_z;
 
     // LOOP2: update position etc per particle (based on old data)
     for(i=startIndex; i<=endIndex; i++) {
@@ -174,74 +170,27 @@ int main(int argc, char* argv[]) {
       vx[i] *= factor;
       vy[i] *= factor;
       vz[i] *= factor;
-      temp_vx[temp_index] = vx[i];
-      temp_vy[temp_index] = vy[i];
-      temp_vz[temp_index] = vz[i];
-      x_copy[temp_index] = x[i];
-      y_copy[temp_index] = y[i];
-      z_copy[temp_index] = z[i];
-      temp_mass[temp_index] = mass[i];
-      temp_index += 1;
     } // end of LOOP 2
 
-    double vx_buffer[num], vy_buffer[num], vz_buffer[num];
-    double x_buffer[num];
-    double y_buffer[num];
-    double z_buffer[num];
-    double mass_buffer[num];
-
-    MPI_Allgather(&temp_vx, partitionSizePerProcess, MPI_DOUBLE, vx_buffer, partitionSizePerProcess, MPI_DOUBLE, MPI_COMM_WORLD);
-    MPI_Allgather(&temp_vy, partitionSizePerProcess, MPI_DOUBLE, vy_buffer, partitionSizePerProcess, MPI_DOUBLE, MPI_COMM_WORLD);
-    MPI_Allgather(&temp_vz, partitionSizePerProcess, MPI_DOUBLE, vz_buffer, partitionSizePerProcess, MPI_DOUBLE, MPI_COMM_WORLD);
-
-    MPI_Allgather(&x_copy, partitionSizePerProcess, MPI_DOUBLE, x_buffer, partitionSizePerProcess, MPI_DOUBLE, MPI_COMM_WORLD);
-    MPI_Allgather(&y_copy, partitionSizePerProcess, MPI_DOUBLE, y_buffer, partitionSizePerProcess, MPI_DOUBLE, MPI_COMM_WORLD);
-    MPI_Allgather(&z_copy, partitionSizePerProcess, MPI_DOUBLE, z_buffer, partitionSizePerProcess, MPI_DOUBLE, MPI_COMM_WORLD);
-
-    MPI_Allgather(&temp_mass, partitionSizePerProcess, MPI_DOUBLE, mass_buffer, partitionSizePerProcess, MPI_DOUBLE, MPI_COMM_WORLD);
-
-    // Update and combine vx, vy, vz for all the ranks
-    for (i=0; i < num; i++) {
-      vx[i] = vx_buffer[i];
-      vy[i] = vy_buffer[i];
-      vz[i] = vz_buffer[i];
-      x[i] = x_buffer[i];
-      y[i] = y_buffer[i];
-      z[i] = z_buffer[i];
-      mass[i] = mass_buffer[i];
-    }
+    //    output_particles(x,y,z, vx,vy,vz, gas, liquid, num);
     
     totalMass = 0.0;
-    localMass = 0.0;
-    for (i=startIndex; i<=endIndex; i++) {
-      localMass += mass[i];
+    for (i=0; i<num; i++) {
+      totalMass += mass[i];
     }
-    MPI_Allreduce(&localMass, &totalMass, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-    // printf("\nRank is %d and the total mass is %lf\n", rankNum, totalMass);
-
+    printf("The total mass is %lf\n", totalMass);
+    // printf("The total mass is %lf\n", totalMass);
     systemEnergy = calc_system_energy(totalMass, vx, vy, vz, num);
     printf("At end of timestep %d with temp %f the system energy=%g and total aerosol mass=%g\n", time, T, systemEnergy, totalMass);
     // temperature drops per timestep
     T *= 0.99999;
   } // time steps
-  MPI_Barrier(MPI_COMM_WORLD);
   printf("Time to init+solve %d molecules for %d timesteps is %g seconds\n", num, timesteps, omp_get_wtime()-start);
   // output a metric (centre of mass) for checking
-
-
   double com[3];
   calc_centre_mass(com, x,y,z,mass,totalMass,num);
   printf("Centre of mass = (%g,%g,%g)\n", com[0], com[1], com[2]);
 } // main
-
-int debugParticle(double *x, double *y, double *z, int num) {
-  int i;
-  printf("Printing the x, y, z before calc centre mass \n");
-  for (i=0;i<num;i++) {
-        printf("Index %d with x=%lf, y=%lf, z=%lf\n", i, x[i], y[i], z[i]);
-  }
-  printf("\n");
-}
 
 
 // init() will return 0 only if successful

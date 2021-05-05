@@ -116,6 +116,7 @@ int main(int argc, char* argv[]) {
       vx[i] *= factor;
       vy[i] *= factor;
       vz[i] *= factor;
+      // printf("Index %d with x=%lf, y=%lf, z=%lf\n", i, x[i], y[i], z[i]);
     } // end of LOOP 2
 
     //    output_particles(x,y,z, vx,vy,vz, gas, liquid, num);
@@ -123,6 +124,13 @@ int main(int argc, char* argv[]) {
     for (i=0; i<num; i++) {
       totalMass += mass[i];
     }
+
+    // printf("Printing the mass values\n");
+    // for (i=0;i<num;i++) {
+    //   printf("%lf ", mass[i]);
+    // }
+    // printf("\n");
+
     systemEnergy = calc_system_energy(totalMass, vx, vy, vz, num);
     printf("At end of timestep %d with temp %f the system energy=%g and total aerosol mass=%g\n", time, T, systemEnergy, totalMass);
     // temperature drops per timestep
