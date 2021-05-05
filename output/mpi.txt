@@ -1,0 +1,10 @@
+Time to init+solve 20000 molecules for 50 timesteps is 726.342 seconds
+Centre of mass = (-0.018349,1.59068,51.0959)
+
+2 cores
+Time to init+solve 20000 molecules for 5 timesteps is 62.8166 seconds
+Centre of mass = (0.109912,0.322769,50.2615)
+
+4 cores
+Time to init+solve 20000 molecules for 5 timesteps is 61.0998 seconds
+Centre of mass = (0.109912,0.322769,50.2615)

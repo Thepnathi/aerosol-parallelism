@@ -1,0 +1,63 @@
+
+Now to integrate for 3 timesteps
+
+ Index=0 ---> Old x=0.000000 and Original x=34.018772
+
+ Index=1 ---> Old x=0.000000 and Original x=-22.222529
+
+ Index=2 ---> Old x=0.000000 and Original x=13.571173
+
+ Index=3 ---> Old x=0.000000 and Original x=-34.332091
+
+ Index=4 ---> Old x=0.000000 and Original x=11.263983
+
+ Index=5 ---> Old x=0.000000 and Original x=2.674498
+
+ Index=6 ---> Old x=0.000000 and Original x=-43.024472
+
+ Index=7 ---> Old x=0.000000 and Original x=-43.582868
+
+ Index=8 ---> Old x=0.000000 and Original x=-23.333425
+
+ Index=9 ---> Old x=0.000000 and Original x=-6.236240
+At end of timestep 1 with temp 300.000000 the system energy=334.574 and total aerosol mass=6.79764
+
+ Index=0 ---> Old x=34.018772 and Original x=39.987571
+
+ Index=1 ---> Old x=-22.222529 and Original x=-19.645110
+
+ Index=2 ---> Old x=13.571173 and Original x=15.710550
+
+ Index=3 ---> Old x=-34.332091 and Original x=-42.155914
+
+ Index=4 ---> Old x=11.263983 and Original x=11.749727
+
+ Index=5 ---> Old x=2.674498 and Original x=10.505087
+
+ Index=6 ---> Old x=-43.024472 and Original x=-51.303355
+
+ Index=7 ---> Old x=-43.582868 and Original x=-52.320951
+
+ Index=8 ---> Old x=-23.333425 and Original x=-18.128449
+
+ Index=9 ---> Old x=-6.236240 and Original x=-1.817193
+At end of timestep 2 with temp 299.997000 the system energy=332.119 and total aerosol mass=7.18334
+
+ Index=0 ---> Old x=39.987571 and Original x=45.828885
+
+ Index=1 ---> Old x=-19.645110 and Original x=-17.284972
+
+ Index=2 ---> Old x=15.710550 and Original x=17.815677
+
+ Index=3 ---> Old x=-42.155914 and Original x=-49.734850
+
+ Index=4 ---> Old x=11.749727 and Original x=12.225777
+
+ Index=5 ---> Old x=10.505087 and Original x=17.866756
+
+ Index=6 ---> Old x=-51.303355 and Original x=-59.310304
+
+ Index=7 ---> Old x=-52.320951 and Original x=-60.448589
+
+ Index=8 ---> Old x=-18.128449 and Original x=-12.945474
+
