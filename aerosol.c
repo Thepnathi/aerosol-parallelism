@@ -1,3 +1,18 @@
+/*
+  COMP328 ASSIGNMENT
+  (c) mkbane, University of Liverpool (2021)
+
+
+  You are provided with this serial code.  Your assignment is to make
+  this code go faster subject to following the formal definition of
+  your assignment. You should add necessary error handling and
+  your final code should work on any number of parallel processing
+  elements. 
+
+  This code is a simplistic model of aerosol processes as described in a 
+  forthcoming book by Topping & Bane (Wiley).
+*/
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,8 +46,8 @@ int main(int argc, char* argv[]) {
     timesteps = atoi(argv[2]);
   }
   else {
-    num = 10;
-    timesteps = 1;
+    num = 20000;
+    timesteps = 50;
   }
 
   printf("Initializing for %d particles in x,y,z space...", num);
@@ -53,17 +68,58 @@ int main(int argc, char* argv[]) {
   old_z = (double *) malloc(num * sizeof(double));
   old_mass = (double *) malloc(num * sizeof(double));
 
+  // should check all rc but let's just see if last malloc worked
+  if (old_mass == NULL) {
+    printf("\n ERROR in malloc for (at least) old_mass - aborting\n");
+    return -99;
+  } 
+  else {
+    printf("  (malloc-ed)  ");
+  }
+
   // initialise
   rc = init(mass, x, y, z, vx, vy, vz, gas, liquid, loss_rate, num);
-
-  totalMass = 0.0; // using MPI_Allreduce here breaks the mass data for some reason...
+  if (rc != 0) {
+    printf("\n ERROR during init() - aborting\n");
+    return -99;
+  }
+  else {
+    printf("  INIT COMPLETE\n");
+  }
+  totalMass = 0.0;
   for (i=0; i<num; i++) {
     mass[i] = gas[i]*gas_mass + liquid[i]*liquid_mass;
     totalMass += mass[i];
   }
-
+  //DEBUG  output_particles(x,y,z, vx,vy,vz, gas, liquid, num);
   systemEnergy = calc_system_energy(totalMass, vx, vy, vz, num);
   printf("Time 0. System energy=%g\n", systemEnergy);
+
+  /* 
+     MAIN TIME STEPPING LOOP
+
+     We 'save' old (entry to timestep loop) values to use on RHS of:
+
+     For each aerosol particle we will: calc forces due to other
+     particles & update change in velocity and thus position; then we
+     condense some of the gas to liquid which changes the mass of the
+     particule so we then determine its new velocity via conservation
+     of kinetic energy.
+
+     Having looped over the particles (using 'old' values on the right
+     hand side as a crude approximation to real life) we then have
+     updated all particles independently. 
+
+     We then determine the total mass & the system energy of the
+     system. 
+
+     The final statement of each time-stepping loop is to decrease the
+     temperature of the system, T.
+
+     After completing all time-steps, we output the the time taken and
+     the centre of mass of the final system configuration.
+
+  */
 
 
   printf("Now to integrate for %d timesteps\n", timesteps);
@@ -88,18 +144,18 @@ int main(int argc, char* argv[]) {
         if (j != i) {
           dx = old_x[j] - x[i];
           dy = old_y[j] - y[i];
-	        dz = old_z[j] - z[i];
+	  dz = old_z[j] - z[i];
           temp_d =sqrt(dx*dx + dy*dy + dz*dz);
           d = temp_d>0.01 ? temp_d : 0.01;
           F = GRAVCONST * mass[i] * old_mass[j] / (d*d);
-	        // calculate acceleration due to the force, F
+	  // calculate acceleration due to the force, F
           ax = (F/mass[i]) * dx/d;
           ay = (F/mass[i]) * dy/d;
-	        az = (F/mass[i]) * dz/d;
-	        // approximate velocities in "unit time"
+	  az = (F/mass[i]) * dz/d;
+	  // approximate velocities in "unit time"
           vx[i] += ax;
           vy[i] += ay;
-	        vz[i] += az;
+	  vz[i] += az;
         }
       } 
       // calc new position 
@@ -116,21 +172,12 @@ int main(int argc, char* argv[]) {
       vx[i] *= factor;
       vy[i] *= factor;
       vz[i] *= factor;
-      // printf("Index %d with x=%lf, y=%lf, z=%lf\n", i, x[i], y[i], z[i]);
     } // end of LOOP 2
-
     //    output_particles(x,y,z, vx,vy,vz, gas, liquid, num);
     totalMass = 0.0;
     for (i=0; i<num; i++) {
       totalMass += mass[i];
     }
-
-    // printf("Printing the mass values\n");
-    // for (i=0;i<num;i++) {
-    //   printf("%lf ", mass[i]);
-    // }
-    // printf("\n");
-
     systemEnergy = calc_system_energy(totalMass, vx, vy, vz, num);
     printf("At end of timestep %d with temp %f the system energy=%g and total aerosol mass=%g\n", time, T, systemEnergy, totalMass);
     // temperature drops per timestep
