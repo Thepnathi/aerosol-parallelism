@@ -11,8 +11,16 @@ int init(double*, double*, double*, double*, double*, double*, double*, double*,
 double calc_system_energy(double, double*, double*, double*, int);
 void output_particles(double*, double*, double*, double*, double*, double*, double*, double*, int);
 void calc_centre_mass(double*, double*, double*, double*, double*, double, int);
+int debugParticle(double *x, double *y, double *z, int num);
 
 int main(int argc, char* argv[]) {
+  MPI_Init(NULL, NULL);
+
+  int numProcesses, rankNum;
+
+  MPI_Comm_size(MPI_COMM_WORLD, &numProcesses);
+  MPI_Comm_rank(MPI_COMM_WORLD, &rankNum);
+
   int i, j;
   int num;     // user defined (argv[1]) total number of gas molecules in simulation
   int time, timesteps; // for time stepping, including user defined (argv[2]) number of timesteps to integrate
@@ -23,14 +31,6 @@ int main(int argc, char* argv[]) {
   double *gas, *liquid, *loss_rate;       // 1D array for each particle's component that will evaporate
   double *old_x, *old_y, *old_z, *old_mass;            // save previous values whilst doing global updates
   double totalMass, localMass, systemEnergy;  // for stats
-    
-  MPI_Init(NULL, NULL);
-
-  int numProcesses, rankNum;
-
-  MPI_Comm_size(MPI_COMM_WORLD, &numProcesses);
-  MPI_Comm_rank(MPI_COMM_WORLD, &rankNum);
-
 
   double start=omp_get_wtime();   // we make use of the simple wall clock timer available in OpenMP 
 
@@ -40,8 +40,8 @@ int main(int argc, char* argv[]) {
     timesteps = atoi(argv[2]);
   }
   else {
-    num = 10;
-    timesteps = 1;
+    num = 20000;
+    timesteps = 50;
   }
 
   printf("Initializing for %d particles in x,y,z space...", num);
@@ -91,6 +91,7 @@ int main(int argc, char* argv[]) {
     double temp_old_y[partitionSizePerProcess];
     double temp_old_z[partitionSizePerProcess];
     double temp_old_mass[partitionSizePerProcess];
+    
     int temp_index = 0;
 
     // LOOP1: take snapshot to use on RHS when looping for updates
@@ -107,10 +108,15 @@ int main(int argc, char* argv[]) {
       temp_index += 1;
     }
 
-    double old_x_buffer[num];
-    double old_y_buffer[num];
-    double old_z_buffer[num];
-    double old_mass_buffer[num];
+    double *old_x_buffer;
+    double *old_y_buffer;
+    double *old_z_buffer;
+    double *old_mass_buffer;
+
+    old_x_buffer = (double *) malloc(num * sizeof(double));
+    old_y_buffer = (double *) malloc(num * sizeof(double));
+    old_z_buffer = (double *) malloc(num * sizeof(double));
+    old_mass_buffer = (double *) malloc(num * sizeof(double));
 
     MPI_Allgather(&temp_old_x, partitionSizePerProcess, MPI_DOUBLE, old_x_buffer, partitionSizePerProcess, MPI_DOUBLE, MPI_COMM_WORLD);
     MPI_Allgather(&temp_old_y, partitionSizePerProcess, MPI_DOUBLE, old_y_buffer, partitionSizePerProcess, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -127,6 +133,11 @@ int main(int argc, char* argv[]) {
       old_z[i] = old_z_buffer[i];
       old_mass[i] = old_mass_buffer[i];
     }
+
+    free(old_x_buffer);
+    free(old_y_buffer);
+    free(old_z_buffer);
+    free(old_mass_buffer);
 
     double temp_d, temp_z;
 
@@ -184,11 +195,17 @@ int main(int argc, char* argv[]) {
       temp_index += 1;
     } // end of LOOP 2
 
-    double vx_buffer[num], vy_buffer[num], vz_buffer[num];
-    double x_buffer[num];
-    double y_buffer[num];
-    double z_buffer[num];
-    double mass_buffer[num];
+    double *vx_buffer, *vy_buffer, *vz_buffer;
+    double *x_buffer, *y_buffer, *z_buffer;
+    double *mass_buffer;
+
+    vx_buffer = (double *) malloc(num * sizeof(double));
+    vy_buffer = (double *) malloc(num * sizeof(double));
+    vz_buffer = (double *) malloc(num * sizeof(double));
+    x_buffer = (double *) malloc(num * sizeof(double));
+    y_buffer = (double *) malloc(num * sizeof(double));
+    z_buffer = (double *) malloc(num * sizeof(double));
+    mass_buffer = (double *) malloc(num * sizeof(double));
 
     MPI_Allgather(&temp_vx, partitionSizePerProcess, MPI_DOUBLE, vx_buffer, partitionSizePerProcess, MPI_DOUBLE, MPI_COMM_WORLD);
     MPI_Allgather(&temp_vy, partitionSizePerProcess, MPI_DOUBLE, vy_buffer, partitionSizePerProcess, MPI_DOUBLE, MPI_COMM_WORLD);
@@ -210,7 +227,15 @@ int main(int argc, char* argv[]) {
       z[i] = z_buffer[i];
       mass[i] = mass_buffer[i];
     }
-    
+
+    free(vx_buffer);
+    free(vy_buffer);
+    free(vz_buffer);
+    free(x_buffer);
+    free(y_buffer);
+    free(z_buffer);
+    free(mass_buffer);
+
     totalMass = 0.0;
     localMass = 0.0;
     for (i=startIndex; i<=endIndex; i++) {
@@ -220,18 +245,21 @@ int main(int argc, char* argv[]) {
     // printf("\nRank is %d and the total mass is %lf\n", rankNum, totalMass);
 
     systemEnergy = calc_system_energy(totalMass, vx, vy, vz, num);
-    printf("At end of timestep %d with temp %f the system energy=%g and total aerosol mass=%g\n", time, T, systemEnergy, totalMass);
+    if (rankNum == 0) {
+      printf("At end of timestep %d with temp %f the system energy=%g and total aerosol mass=%g\n", time, T, systemEnergy, totalMass);
+    }
     // temperature drops per timestep
     T *= 0.99999;
   } // time steps
+  
   MPI_Barrier(MPI_COMM_WORLD);
-  printf("Time to init+solve %d molecules for %d timesteps is %g seconds\n", num, timesteps, omp_get_wtime()-start);
-  // output a metric (centre of mass) for checking
-
-
-  double com[3];
-  calc_centre_mass(com, x,y,z,mass,totalMass,num);
-  printf("Centre of mass = (%g,%g,%g)\n", com[0], com[1], com[2]);
+  if (rankNum == 0) {
+    printf("Time to init+solve %d molecules for %d timesteps is %g seconds\n", num, timesteps, omp_get_wtime()-start);
+    // output a metric (centre of mass) for checking
+    double com[3];
+    calc_centre_mass(com, x,y,z,mass,totalMass,num);
+    printf("Centre of mass = (%g,%g,%g)\n", com[0], com[1], com[2]);
+  }
 } // main
 
 int debugParticle(double *x, double *y, double *z, int num) {

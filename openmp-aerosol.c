@@ -37,7 +37,6 @@ int main(int argc, char* argv[]) {
     timesteps = 50;
   }
 
-  printf("Using OpenMP with %d threads\n", numThreads);
   printf("Initializing for %d particles in x,y,z space...", num);
 
   /* malloc arrays and pass ref to init(). NOTE: init() uses random numbers */
@@ -61,7 +60,6 @@ int main(int argc, char* argv[]) {
 
   totalMass = 0.0; // using MPI_Allreduce here breaks the mass data for some reason...
 
-  #pragma omp parallel for default(none) shared(num, mass, gas, gas_mass, liquid, liquid_mass) private(i) reduction(+:totalMass)
   for (i=0; i<num; i++) {
     mass[i] = gas[i]*gas_mass + liquid[i]*liquid_mass;
     totalMass += mass[i];
@@ -217,10 +215,8 @@ void output_particles(double *x, double *y, double *z, double *vx, double *vy, d
 void calc_centre_mass(double *com, double *x, double *y, double *z, double *mass, double totalMass, int N) {
   int i, axis;
    // calculate the centre of mass, com(x,y,z)
-  #pragma omp parallel
   for (axis=0; axis<2; axis++) {
     com[0] = 0.0;     com[1] = 0.0;     com[2] = 0.0; 
-    #pragma omp for
     for (i=0; i<N; i++) {
       com[0] += mass[i]*x[i];
       com[1] += mass[i]*y[i];

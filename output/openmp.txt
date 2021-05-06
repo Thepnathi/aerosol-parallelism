@@ -2,20 +2,13 @@ threads=13
 Time to init+solve 20000 molecules for 5 timesteps is 9.02734 seconds
 Centre of mass = (0.109912,0.322769,50.2615)
 
-threads=13 + para system energy
-Time to init+solve 20000 molecules for 5 timesteps is 9.72148 seconds
-Centre of mass = (0.109912,0.322769,50.2615)
 
-threads=13 + para inner loop inside timestep 
-At end of timestep 5 with temp 299.988000 the system energy=710080 and total aerosol mass=17247.8
-Time to init+solve 20000 molecules for 5 timesteps is 3.0541 seconds
-
-
-Time to init+solve 20000 molecules for 50 timesteps is 48.7197 seconds
+threads=4
+Time to init+solve 20000 molecules for 50 timesteps is 23.7567 seconds
 Centre of mass = (-0.018349,1.59068,51.0959)
 
-threads=13 
-Time to init+solve 20000 molecules for 50 timesteps is 27.3058 seconds
+threads=13
+Time to init+solve 20000 molecules for 50 timesteps is 27.1009 seconds
 Centre of mass = (-0.018349,1.59068,51.0959)
 
 threads=40
