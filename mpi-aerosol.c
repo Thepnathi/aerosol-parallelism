@@ -62,8 +62,25 @@ int main(int argc, char* argv[]) {
   old_z = (double *) malloc(num * sizeof(double));
   old_mass = (double *) malloc(num * sizeof(double));
 
+  // should check all rc but let's just see if last malloc worked
+  if (old_mass == NULL) {
+    printf("\n ERROR in malloc for (at least) old_mass - aborting\n");
+    return -99;
+  } 
+  else {
+    printf("  (malloc-ed)  ");
+  }
+
   // initialise
   rc = init(mass, x, y, z, vx, vy, vz, gas, liquid, loss_rate, num);
+
+  if (rc != 0) {
+    printf("\n ERROR during init() - aborting\n");
+    return -99;
+  }
+  else {
+    printf("  INIT COMPLETE\n");
+  }
 
   totalMass = 0.0; // using MPI_Allreduce here breaks the mass data for some reason...
   for (i=0; i<num; i++) {
