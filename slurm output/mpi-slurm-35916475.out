@@ -1,13 +1,41 @@
-Node list                    : node100
+Node list                    : node093
 Number of nodes allocated    : 1 or 1
-Number of threads or processes          : 2
-Number of processes per node : 2
+Number of threads or processes          : 16
+Number of processes per node : 16
 Requested tasks per node     : 
 Requested CPUs per task      : 
 Scheduling priority          : 0
 compiling mpi-aerosol.c to mpi-aerosol.exe
-using 2 MPI processes
-Initializing for 20000 particles in x,y,z space...Initializing for 20000 particles in x,y,z space...Time 0. System energy=721112
+Using 16 MPI processes
+Initializing for 20000 particles in x,y,z space...Initializing for 20000 particles in x,y,z space...Initializing for 20000 particles in x,y,z space...Initializing for 20000 particles in x,y,z space...Initializing for 20000 particles in x,y,z space...Initializing for 20000 particles in x,y,z space...Initializing for 20000 particles in x,y,z space...Initializing for 20000 particles in x,y,z space...Initializing for 20000 particles in x,y,z space...Initializing for 20000 particles in x,y,z space...Initializing for 20000 particles in x,y,z space...Initializing for 20000 particles in x,y,z space...Initializing for 20000 particles in x,y,z space...Initializing for 20000 particles in x,y,z space...Initializing for 20000 particles in x,y,z space...Initializing for 20000 particles in x,y,z space...Time 0. System energy=721112
+Now to integrate for 50 timesteps
+Time 0. System energy=721112
+Now to integrate for 50 timesteps
+Time 0. System energy=721112
+Now to integrate for 50 timesteps
+Time 0. System energy=721112
+Now to integrate for 50 timesteps
+Time 0. System energy=721112
+Now to integrate for 50 timesteps
+Time 0. System energy=721112
+Now to integrate for 50 timesteps
+Time 0. System energy=721112
+Now to integrate for 50 timesteps
+Time 0. System energy=721112
+Now to integrate for 50 timesteps
+Time 0. System energy=721112
+Now to integrate for 50 timesteps
+Time 0. System energy=721112
+Now to integrate for 50 timesteps
+Time 0. System energy=721112
+Now to integrate for 50 timesteps
+Time 0. System energy=721112
+Now to integrate for 50 timesteps
+Time 0. System energy=721112
+Now to integrate for 50 timesteps
+Time 0. System energy=721112
+Now to integrate for 50 timesteps
+Time 0. System energy=721112
 Now to integrate for 50 timesteps
 Time 0. System energy=721112
 Now to integrate for 50 timesteps
@@ -61,6 +89,6 @@ At end of timestep 47 with temp 299.862031 the system energy=732553 and total ae
 At end of timestep 48 with temp 299.859032 the system energy=732622 and total aerosol mass=30194.9
 At end of timestep 49 with temp 299.856034 the system energy=732678 and total aerosol mass=30358.7
 At end of timestep 50 with temp 299.853035 the system energy=732722 and total aerosol mass=30518.8
-Time to init+solve 20000 molecules for 50 timesteps is 293.953 seconds
+Time to init+solve 20000 molecules for 50 timesteps is 43.0899 seconds
 Centre of mass = (-0.018349,1.59068,51.0959)
 
